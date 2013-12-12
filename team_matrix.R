@@ -1,43 +1,43 @@
-library(multicore)
-# matrix.team <- NULL
-list.team <- levels(raw.team.join$team_id)
-# matrix.team <- matrix(nrow=length(list.team), ncol=length(list.team))
+temp.procTime <- proc.time()
 
-# for(i in 1:5){
-# 	print(i)
-# 	temp_subset.byTeam 		<- subset(raw.team.join, team_id == list.team[i])
-# 	temp_subset.listTeam 	<- subset(raw.team.join, lender_id %in% temp_subset.byTeam$lender_id)
-# 	temp_table.team <- as.vector(table(temp_subset.listTeam$team_id))
-# 	matrix.team[i,] <- temp_table.team
-# }
-# matrix.team <- sapply(list.team, function(x){
-# 	print(x)
-# 	temp.listId <- raw.team.join$lender_id[raw.team.join$team_id==x]
-# 	temp.listTeam <- raw.team.join$team_id[raw.team.join$lender_id %in% temp.listId]
-# 	return(as.vector(table(temp.listTeam)))
-# 	})
-# rownames(matrix.team) <- list.team
+source('team_matrix_function.R')
 
-teamList <- function(x){
-	temp.initTeam <- unlist(x)
-	if(length(temp.initTeam)){
-		temp.listId <- raw.team.join$lender_id[raw.team.join$team_id %in% temp.initTeam]
-		temp.listTeam <- raw.team.join$team_id[raw.team.join$lender_id %in% temp.listId]
-		temp.tableTeam <- sort(table(temp.listTeam), decreasing=TRUE)
-		temp.tableTeam <- temp.tableTeam[-which(names(temp.tableTeam) %in% temp.initTeam)]
-		return(paste(names(temp.tableTeam[1:10]), collapse=' '))		
-	}
-	else{
-		temp.tableTeam <- sort(table(raw.team.join$team_id), decreasing=TRUE)
-		return(paste(names(temp.tableTeam[1:10]), collapse=' '))		
-	}
-}
+# for no precious team ids.
+# matrix.team$Teams[which(sapply(id_integrated$list_team, length) == 0)] <- teamList(id_integrated$list_team[3])
 
 matrix.team <- data.frame(Id=1:nrow(id_integrated))
-matrix.team$Teams <- sapply(mclapply(id_integrated$list_team, function(x){teamList(x)}), as.vector)
-# temp.initTeam <- id_integrated$list_team[[1]]
-# temp.listId <- raw.team.join$lender_id[raw.team.join$team_id %in% temp.initTeam]
-# temp.listTeam <- raw.team.join$team_id[raw.team.join$lender_id %in% temp.listId]
-# temp.tableTeam <- sort(table(temp.listTeam), decreasing=TRUE)
-# temp.tableTeam <- temp.tableTeam[-which(names(temp.tableTeam) %in% temp.initTeam)]
+# matrix.team$Teams <- sapply(mclapply(id_integrated$list_team, function(x){teamList(x)}), as.vector)
+matrix.team$Teams <- sapply(mclapply(id_integrated$id, function(x){teamList(x)}), as.vector)
+# sapply(id_integrated$id[1:10], function(x){teamList(x)})
+
+
+# raw.teams[raw.teams$team_id %in% names(temp.tableTeam[100:120]), c('number_of_members', 'loan_cout' ,'loaned_amount', 'mean_loan')]
+# raw.teams[raw.teams$team_id %in% names(temp.tableTeam[1:20]), c('loaned_amount_perLoan', 'loan_cout_perPerson', 'loaned_amount_perPerson')]
+# raw.teams[raw.teams$team_id %in% names(temp.tableTeam[100:120]), c('loaned_amount_perLoan', 'loan_cout_perPerson', 'loaned_amount_perPerson')]
+
+
+#detect country code
+# sapply(tolower(c('United States','USA')), function(x)grep(x, tolower(raw.teams$location[1:60])))
+# raw.teams$countryCode <- sapply(toupper(c('United States', 'USA')), function(x){
+# 	gsub(x, 'US', toupper(raw.teams$location[1:60]))})
+# gsub("([\w\W]*)((UNITED STATES)+|(USA)+)", 'US', toupper(raw.teams$location[1:60]))
+
+# idx.us <- grep(
+# 	paste("[\\W](UNITED STATES|USA|US)", 
+# 		paste0('(', paste(raw.stateCode$Code, collapse='|'), ')', collapse=''), 
+# 		paste0('(', paste(raw.stateCode$State, collapse='|'), ')', collapse=''), sep='|')
+# 	, toupper(raw.teams$location[1:60]))
+# regexp.us <-paste("((UNITED STATES)|(USA)|(US))", 
+# 		paste0('((, )', paste0('(', raw.stateCode$Code, ')', collapse='|'), ')', collapse=''), sep='|')
+
+
+# sapply(toupper(raw.teams$location), function(x){ifelse(grep("((UNITED STATES)|(USA)|(US))", x), 'US', NA)}
+
+
 write.csv(matrix.team, paste('output/output', Sys.time(), '.csv', collapse=''), row.names=FALSE)
+
+
+
+proc.time() - temp.procTime
+
+

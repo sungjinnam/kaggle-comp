@@ -35,3 +35,18 @@ raw.teams <- read.table('data//teams.tsv', header=FALSE, sep="\t", na.strings="N
 raw.teams$loaned_amount_perLoan <- raw.teams$loaned_amount / raw.teams$loan_cout
 raw.teams$loan_cout_perPerson <- raw.teams$loan_cout / raw.teams$number_of_members
 raw.teams$loaned_amount_perPerson <- raw.teams$loaned_amount / raw.teams$number_of_members
+
+raw.countryCode <- read.table('data/countryCode.tsv', header=TRUE, sep='\t', stringsAsFactors=TRUE)
+raw.countryCode$Internet <- toupper(raw.countryCode$Internet)
+raw.stateCode <- read.table('data/stateCode.tsv', header=TRUE, sep='\t', stringsAsFactors=TRUE)
+
+regexp.us <- "((UNITED STATES)|(USA)|(US))"
+idx.us <- grep(regexp.us, toupper(raw.teams$location))
+raw.teams$countryCode <- NA
+raw.teams$countryCode[idx.us] <- 'US'
+raw.teams$mean_loan <- raw.teams$loaned_amount / raw.teams$loan_cout
+raw.teams$loan_cout_z <- sapply(raw.teams$loan_cout, function(x){(x-mean(raw.teams$loan_cout, na.rm=T))/sd(raw.teams$loan_cout, na.rm=T)})
+raw.teams$loaned_amount_z <- sapply(raw.teams$loaned_amount, function(x){(x-mean(raw.teams$loaned_amount, na.rm=T))/sd(raw.teams$loaned_amount, na.rm=T)}) <- raw.teams$loan_cout_z + raw.teams$loan_cout_z
+raw.teams$number_of_members_z <- sapply(raw.teams$number_of_members, function(x){(x-mean(raw.teams$number_of_members, na.rm=T))/sd(raw.teams$number_of_members, na.rm=T)})
+raw.teams$sum.loan_cout_z_loaned_amount_z <- raw.teams$loan_cout_z + raw.teams$loaned_amount_z
+raw.teams$sum_z <- raw.teams$loan_cout_z + raw.teams$loaned_amount_z + raw.teams$number_of_members_z
